@@ -34,10 +34,21 @@ test("server-renders the Bertucci Labs homepage", async () => {
     /<title>Bertucci Labs \| Intelligence, engineered<\/title>/i,
   );
   assert.match(html, /Intelligence, engineered/);
-  assert.match(html, /Applied AI/);
+  assert.match(html, /Applied research/);
+  assert.match(html, /AI systems/);
   assert.match(html, /Custom software/);
-  assert.match(html, /Engineering partnership/);
-  assert.match(html, /hello@bertuccilabs\.com/);
+  assert.match(html, /Approach/);
+  assert.match(html, /Have a project in mind/);
+  assert.doesNotMatch(html, /mailto:|[A-Za-z0-9._%+-]+@bertuccilabs\.com/i);
+  assert.match(html, /Start a conversation/);
+  assert.match(html, /dark-mode-logo\.svg/);
+  assert.match(html, /Tell us about the project/);
+  assert.match(html, /contact-name/);
+  assert.match(html, /contact-email/);
+  assert.match(html, /contact-company/);
+  assert.match(html, /contact-message/);
+  assert.match(html, /contact-website/);
+  assert.doesNotMatch(html, /Research &amp; prototyping|Complexity, made useful|From first principles to production|Explore our services/);
   assert.doesNotMatch(
     html,
     /codex-preview|SkeletonPreview|react-loading-skeleton/i,
@@ -52,6 +63,12 @@ test("removes disposable starter preview references", async () => {
   ]);
 
   assert.doesNotMatch(page, /_sites-preview|SkeletonPreview|codex-preview/);
+  assert.doesNotMatch(page, /function LogoMark|logo-top|logo-spine/);
+  assert.doesNotMatch(page, /brand-lockup|brand-mark|brand-wordmark/);
+  assert.doesNotMatch(
+    page,
+    /bertucci-labs-lockup-red-corners|bertucci-bl-mark-red-corners/,
+  );
   assert.doesNotMatch(layout, /Starter Project|codex-preview|_sites-preview/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });

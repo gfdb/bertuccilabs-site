@@ -1,0 +1,19 @@
+packages:
+  - name: contact
+    environment:
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
+      CONTACT_FROM: ${CONTACT_FROM}
+      CONTACT_TO: ${CONTACT_TO}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      TURNSTILE_HOSTNAMES: ${TURNSTILE_HOSTNAMES}
+      APP_ENV: ${APP_ENV}
+    actions:
+      - name: send
+        runtime: nodejs:22
+        web: raw
+        limits:
+          timeout: 10000
+          memory: 256
+        annotations:
+          web-custom-options: true

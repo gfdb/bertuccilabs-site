@@ -14,35 +14,26 @@ const geistMono = Geist_Mono({
 
 const title = "Bertucci Labs | Intelligence, engineered";
 const description =
-  "Custom AI systems and software engineering for the problems that matter to your business.";
+  "Applied research, AI systems, and custom software. Bertucci Labs helps businesses investigate technical questions, build products, and improve existing systems.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bertucci-labs.elated-fairy-7714.chatgpt.site"),
+  metadataBase: new URL("https://bertuccilabs.com"),
   title,
   description,
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    shortcut: [{ url: "/favicon.png", type: "image/png" }],
   },
   openGraph: {
     title,
     description,
     url: "/",
     siteName: "Bertucci Labs",
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Bertucci Labs red wire terrain with Intelligence, engineered.",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/og.png"],
   },
 };
 
