@@ -53,14 +53,26 @@ export default function Home() {
     <main className="min-h-screen overflow-hidden bg-[#080909] text-[#f6f6f2]">
       <div className="site-shell">
         <header className="site-header">
-          <Link href="/" aria-label="Bertucci Labs home">
+          <Link
+            className="header-brand"
+            href="/"
+            aria-label="Bertucci Labs home"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              className="brand-logo"
-              src="/brand/dark-mode-logo.svg"
+              className="brand-monogram"
+              src="/brand/bl-monogram.svg"
               alt=""
-              width="199"
+              width="33"
               height="43"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="brand-lettering"
+              src="/brand/bertucci-labs-lettering.svg"
+              alt=""
+              width="149"
+              height="13"
             />
           </Link>
           <nav className="main-nav" aria-label="Primary navigation">

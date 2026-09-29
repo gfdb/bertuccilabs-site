@@ -87,11 +87,33 @@ a {
   backdrop-filter: blur(18px);
 }
 
-.brand-logo {
+.header-brand {
+  /* Header logo controls */
+  --brand-monogram-width: 27px;
+  --brand-lettering-width: 150px;
+  --brand-lockup-gap: 13px;
+  --brand-lettering-offset-y: 0px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--brand-lockup-gap);
+  max-width: 72vw;
+}
+
+.brand-monogram,
+.brand-lettering {
   display: block;
-  width: clamp(148px, 13vw, 202px);
   height: auto;
-  max-width: 48vw;
+  flex: 0 0 auto;
+}
+
+.brand-monogram {
+  width: var(--brand-monogram-width);
+}
+
+.brand-lettering {
+  width: var(--brand-lettering-width);
+  transform: translateY(var(--brand-lettering-offset-y));
 }
 
 .main-nav {
@@ -99,7 +121,7 @@ a {
   align-items: center;
   gap: clamp(24px, 4.4vw, 72px);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -467,14 +489,9 @@ a {
     justify-content: center;
     flex-wrap: wrap;
     gap: 14px 26px;
-    font-size: 0.62rem;
+    font-size: 0.66rem;
     letter-spacing: 0.12em;
     text-align: center;
-  }
-
-  .brand-logo {
-    width: clamp(142px, 48vw, 184px);
-    max-width: 72vw;
   }
 
   .hero-section {
@@ -575,7 +592,7 @@ a {
 
 @media (max-width: 420px) {
   .main-nav {
-    font-size: 0.58rem;
+    font-size: 0.62rem;
     gap: 12px 20px;
   }
 

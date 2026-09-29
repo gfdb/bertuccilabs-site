@@ -20,7 +20,13 @@ test("statically exports the Bertucci Labs homepage", async () => {
   assert.match(html, /Have a project in mind/);
   assert.doesNotMatch(html, /mailto:|[A-Za-z0-9._%+-]+@bertuccilabs\.com/i);
   assert.match(html, /Start a conversation/);
-  assert.match(html, /dark-mode-logo\.svg/);
+  assert.match(html, /bl-monogram\.svg/);
+  assert.match(html, /bertucci-labs-lettering\.svg/);
+  assert.match(html, /og\.png/);
+  assert.match(
+    html,
+    /Applied research, AI systems, and custom software\./,
+  );
   assert.match(html, /Tell us about the project/);
   assert.match(html, /contact-name/);
   assert.match(html, /contact-email/);
@@ -31,6 +37,10 @@ test("statically exports the Bertucci Labs homepage", async () => {
   assert.doesNotMatch(
     html,
     /codex-preview|SkeletonPreview|react-loading-skeleton/i,
+  );
+  assert.doesNotMatch(
+    html,
+    /helps businesses investigate technical questions/i,
   );
 });
 

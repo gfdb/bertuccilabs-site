@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 const title = "Bertucci Labs | Intelligence, engineered";
-const description =
-  "Applied research, AI systems, and custom software. Bertucci Labs helps businesses investigate technical questions, build products, and improve existing systems.";
+const description = "Applied research, AI systems, and custom software.";
+const socialImage = {
+  url: "/og.png",
+  width: 1200,
+  height: 630,
+  alt: "Bertucci Labs BL monogram in white and red on charcoal.",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bertuccilabs.com"),
@@ -29,11 +34,13 @@ export const metadata: Metadata = {
     description,
     url: "/",
     siteName: "Bertucci Labs",
+    images: [socialImage],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
+    images: [socialImage],
   },
 };
 
