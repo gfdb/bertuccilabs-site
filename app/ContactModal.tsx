@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -13,6 +14,7 @@ import {
 
 const turnstileScriptSrc =
   "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const successMessage = "Your message was sent, we'll get back to you soon!";
 
 type PublicEnv = {
   VITE_CONTACT_ENDPOINT?: string;
@@ -194,6 +196,7 @@ export default function ContactModal({
 }: ContactModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
+  const successTitleRef = useRef<HTMLHeadingElement>(null);
   const widgetContainerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<TurnstileWidgetId | null>(null);
   const inFlightRef = useRef(false);
@@ -207,6 +210,7 @@ export default function ContactModal({
   >({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [statusMessage, setStatusMessage] = useState("");
+  const reduceMotion = useReducedMotion();
   const config = useMemo(() => getConfig(), []);
   const formUnavailable = !config.endpoint || !config.siteKey;
 
@@ -230,6 +234,12 @@ export default function ContactModal({
   }, [open]);
 
   useEffect(() => {
+    if (open && status === "success") {
+      window.setTimeout(() => successTitleRef.current?.focus(), 0);
+    }
+  }, [open, status]);
+
+  useEffect(() => {
     if (!open) {
       openerRef.current?.focus();
       return;
@@ -250,6 +260,8 @@ export default function ContactModal({
           theme: "dark",
           callback: (token) => {
             setTurnstileToken(token);
+            setStatus("idle");
+            setStatusMessage("");
             setFieldErrors((current) => ({
               ...current,
               turnstile: undefined,
@@ -311,7 +323,11 @@ export default function ContactModal({
       setFieldErrors((current) => ({ ...current, [field]: undefined }));
       if (field !== "website") {
         setRequestId(createRequestId());
-        if (status === "success") {
+        if (
+          status === "validation-error" ||
+          status === "verification-error" ||
+          status === "service-error"
+        ) {
           setStatus("idle");
           setStatusMessage("");
         }
@@ -362,7 +378,7 @@ export default function ContactModal({
 
       if (response.ok) {
         setStatus("success");
-        setStatusMessage("Thanks - your message has been submitted.");
+        setStatusMessage(successMessage);
         setForm(emptyForm);
         setRequestId(createRequestId());
         setFieldErrors({});
@@ -405,6 +421,10 @@ export default function ContactModal({
   const displayedStatusMessage = formUnavailable
     ? "The contact form is temporarily unavailable. Please try again later."
     : statusMessage;
+  const displayedStatusIsError =
+    displayedStatus === "validation-error" ||
+    displayedStatus === "verification-error" ||
+    displayedStatus === "service-error";
 
   return (
     <dialog
@@ -426,110 +446,224 @@ export default function ContactModal({
         >
           x
         </button>
-        <p className="kicker text-red">Contact</p>
-        <h2 id={titleId}>Tell us about the project.</h2>
-        <p id={descriptionId} className="modal-intro">
-          Share what you&apos;re trying to build, improve, or find out. We&apos;ll
-          help assess the technical options and next steps.
-        </p>
-
-        <form className="contact-form" onSubmit={handleSubmit} noValidate>
-          <div className="form-field">
-            <label htmlFor="contact-name">Name</label>
-            <input
-              ref={firstFieldRef}
-              id="contact-name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              maxLength={120}
-              value={form.name}
-              onChange={handleChange("name")}
-              required
-            />
-            {fieldErrors.name ? <span>{fieldErrors.name}</span> : null}
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="contact-email">Email</label>
-            <input
-              id="contact-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              maxLength={254}
-              value={form.email}
-              onChange={handleChange("email")}
-              required
-            />
-            {fieldErrors.email ? <span>{fieldErrors.email}</span> : null}
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="contact-company">
-              Company <em>optional</em>
-            </label>
-            <input
-              id="contact-company"
-              name="company"
-              type="text"
-              autoComplete="organization"
-              maxLength={120}
-              value={form.company}
-              onChange={handleChange("company")}
-            />
-            {fieldErrors.company ? <span>{fieldErrors.company}</span> : null}
-          </div>
-
-          <div className="form-field form-field-full">
-            <label htmlFor="contact-message">Message</label>
-            <textarea
-              id="contact-message"
-              name="message"
-              minLength={10}
-              maxLength={5000}
-              value={form.message}
-              onChange={handleChange("message")}
-              required
-            />
-            {fieldErrors.message ? <span>{fieldErrors.message}</span> : null}
-          </div>
-
-          <div className="hp-field" aria-hidden="true">
-            <label htmlFor="contact-website">Website</label>
-            <input
-              id="contact-website"
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              value={form.website}
-              onChange={handleChange("website")}
-            />
-          </div>
-
-          <div className="turnstile-area">
-            <div ref={widgetContainerRef} className="turnstile-slot" />
-            {fieldErrors.turnstile ? <span>{fieldErrors.turnstile}</span> : null}
-          </div>
-
-          <div className="form-footer">
-            <button
-              className="button-primary"
-              type="submit"
-              disabled={status === "submitting" || formUnavailable}
+        <AnimatePresence mode="wait" initial={false}>
+          {status === "success" ? (
+            <motion.section
+              key="success"
+              className="contact-success"
+              initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.35 }}
+              role="status"
+              aria-live="polite"
             >
-              {status === "submitting" ? "Sending..." : "Send message"}
-            </button>
-          </div>
+              <div className="mail-sent-animation" aria-hidden="true">
+                <motion.span
+                  className="mail-flight"
+                  initial={
+                    reduceMotion
+                      ? false
+                      : { opacity: 0, x: -42, y: 18, rotate: -8 }
+                  }
+                  animate={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.7,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <svg viewBox="0 0 68 52" focusable="false">
+                    <rect x="3" y="6" width="62" height="40" rx="2" />
+                    <path d="m5 9 29 22L63 9" />
+                    <path d="m4 44 21-20M64 44 43 24" />
+                  </svg>
+                </motion.span>
+                <motion.span
+                  className="mail-success-check"
+                  initial={reduceMotion ? false : { opacity: 0, scale: 0.55 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: reduceMotion ? 0 : 0.52,
+                    duration: reduceMotion ? 0 : 0.3,
+                    ease: "backOut",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="m7.5 12 3 3 6-7" />
+                  </svg>
+                </motion.span>
+              </div>
+              <p className="kicker text-red">Message sent</p>
+              <h2 ref={successTitleRef} id={titleId} tabIndex={-1}>
+                Thank you.
+              </h2>
+              <p id={descriptionId} className="success-copy">
+                {statusMessage}
+              </p>
+              <button className="button-primary" type="button" onClick={close}>
+                Done
+              </button>
+            </motion.section>
+          ) : (
+            <motion.div
+              key="form"
+              className="modal-form-view"
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+              transition={{ duration: reduceMotion ? 0 : 0.2 }}
+            >
+              <p className="kicker text-red">Contact</p>
+              <h2 id={titleId}>Tell us about the project.</h2>
+              <p id={descriptionId} className="modal-intro">
+                Share what you&apos;re trying to build, improve, or find out.
+                We&apos;ll help assess the technical options and next steps.
+              </p>
 
-          <p
-            className={`form-status form-status-${displayedStatus}`}
-            role="status"
-            aria-live="polite"
-          >
-            {displayedStatusMessage}
-          </p>
-        </form>
+              <form className="contact-form" onSubmit={handleSubmit} noValidate>
+                <div className="form-field">
+                  <label htmlFor="contact-name">Name</label>
+                  <input
+                    ref={firstFieldRef}
+                    id="contact-name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    maxLength={120}
+                    value={form.name}
+                    onChange={handleChange("name")}
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-describedby={
+                      fieldErrors.name ? "contact-name-error" : undefined
+                    }
+                    required
+                  />
+                  {fieldErrors.name ? (
+                    <span id="contact-name-error">{fieldErrors.name}</span>
+                  ) : null}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="contact-email">Email</label>
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    maxLength={254}
+                    value={form.email}
+                    onChange={handleChange("email")}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={
+                      fieldErrors.email ? "contact-email-error" : undefined
+                    }
+                    required
+                  />
+                  {fieldErrors.email ? (
+                    <span id="contact-email-error">{fieldErrors.email}</span>
+                  ) : null}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="contact-company">
+                    Company <em>optional</em>
+                  </label>
+                  <input
+                    id="contact-company"
+                    name="company"
+                    type="text"
+                    autoComplete="organization"
+                    maxLength={120}
+                    value={form.company}
+                    onChange={handleChange("company")}
+                    aria-invalid={Boolean(fieldErrors.company)}
+                    aria-describedby={
+                      fieldErrors.company ? "contact-company-error" : undefined
+                    }
+                  />
+                  {fieldErrors.company ? (
+                    <span id="contact-company-error">{fieldErrors.company}</span>
+                  ) : null}
+                </div>
+
+                <div className="form-field form-field-full">
+                  <label htmlFor="contact-message">Message</label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    minLength={10}
+                    maxLength={5000}
+                    value={form.message}
+                    onChange={handleChange("message")}
+                    aria-invalid={Boolean(fieldErrors.message)}
+                    aria-describedby={
+                      fieldErrors.message ? "contact-message-error" : undefined
+                    }
+                    required
+                  />
+                  {fieldErrors.message ? (
+                    <span id="contact-message-error">{fieldErrors.message}</span>
+                  ) : null}
+                </div>
+
+                <div className="hp-field" aria-hidden="true">
+                  <label htmlFor="contact-website">Website</label>
+                  <input
+                    id="contact-website"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.website}
+                    onChange={handleChange("website")}
+                  />
+                </div>
+
+                <div className="turnstile-area">
+                  <div ref={widgetContainerRef} className="turnstile-slot" />
+                  {fieldErrors.turnstile ? (
+                    <span>{fieldErrors.turnstile}</span>
+                  ) : null}
+                </div>
+
+                <div className="form-footer">
+                  <button
+                    className="button-primary"
+                    type="submit"
+                    disabled={status === "submitting" || formUnavailable}
+                  >
+                    {status === "submitting" ? "Sending..." : "Send message"}
+                  </button>
+                </div>
+
+                {displayedStatusMessage ? (
+                  <div
+                    className={`form-notice form-notice-${displayedStatus}`}
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {displayedStatus === "submitting" ? (
+                      <span
+                        className="form-notice-spinner"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    {displayedStatusIsError ? (
+                      <svg
+                        className="form-notice-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="9.5" />
+                        <path d="M12 7.5v5.5M12 16.5h.01" />
+                      </svg>
+                    ) : null}
+                    <p>{displayedStatusMessage}</p>
+                  </div>
+                ) : null}
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </dialog>
   );
